@@ -4,6 +4,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.admin.portal.assemblers.UserAssembler;
@@ -96,11 +98,17 @@ public class UserController {
     }
     
     @GetMapping("/user/{id}/payments")
-    public Set<Payment> getPaymentByPaymentCode(@PathVariable Long id) {
+    public Payment getPaymentByPaymentCode(@PathVariable Long id, @RequestParam String paymentCode) {
     	
     	User u =  userRespository.findById(id)
     			.orElseThrow(() -> new UserNotFoundException(id) );
-    	return u.getPayments();
+    	Payment payment = new Payment();
+    	for(Payment p : u.getPayments()) {
+    		if( paymentCode != null && paymentCode.equals(p.getPaymentCode()) ) {
+    			payment = p;
+    		}
+    	}
+    	return payment;
     }
 	
 }
