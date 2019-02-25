@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -53,11 +54,19 @@ public class UserController {
     @GetMapping("/users")
     public Resources<Resource<User>> all(Pageable p) {
     	
+    	
     	List<Resource<User>> users = userRespository.findAll(p).stream()
     									.map(userAssembler::toResource)
     									.collect(Collectors.toList());
     	return new Resources<Resource<User>>(users,
     			ControllerLinkBuilder.linkTo(methodOn(UserController.class).all(p)).withSelfRel());
+    }
+    
+    @GetMapping("/users/pagination")
+    public Page<User> allP(Pageable p) {
+      	Page<User> users = userRespository.findAll(p);
+    	
+    	return users;
     }
     
     @PostMapping("/add/user")

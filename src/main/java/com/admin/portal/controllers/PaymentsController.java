@@ -15,6 +15,7 @@ import com.admin.portal.models.User;
 import com.admin.portal.repositories.MovieRepository;
 import com.admin.portal.repositories.PaymentRepository;
 import com.admin.portal.repositories.UserRepository;
+import com.admin.portal.util.RandomNUmberGenerator;
 
 @RestController
 public class PaymentsController {
@@ -27,6 +28,8 @@ public class PaymentsController {
 	
 	@Autowired
 	private MovieRepository movieRepository;
+	
+	private RandomNUmberGenerator ranGenerator = new RandomNUmberGenerator();
 	
 	 @PostMapping("/createPayment")
 		Payment createPayment(@RequestBody Payment payment) throws URISyntaxException {
@@ -48,7 +51,15 @@ public class PaymentsController {
 
 	private void addPaymentCode(Payment payment) {
 		
-		
+		String paymentCode = ranGenerator.nextString();
+		Payment p = paymentRepository.getPaymentByPaymentCode(paymentCode);
+		while (p != null) {
+			
+			paymentCode = ranGenerator.nextString();
+			p = paymentRepository.getPaymentByPaymentCode(paymentCode);
+			
+		}
+		payment.setPaymentCode(ranGenerator.nextString());
 		
 	}
 
