@@ -4,7 +4,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,10 +24,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.admin.portal.DTO.PaymentDTO;
 import com.admin.portal.assemblers.UserAssembler;
 import com.admin.portal.exceptions.UserNotFoundException;
+import com.admin.portal.models.Movie;
 import com.admin.portal.models.Payment;
 import com.admin.portal.models.User;
+import com.admin.portal.repositories.MovieRepository;
+import com.admin.portal.repositories.PaymentRepository;
 import com.admin.portal.repositories.UserRepository;
 
 @RestController
@@ -40,9 +44,17 @@ public class UserController {
 	@Autowired
 	private UserAssembler userAssembler;
 	
-	public UserController(UserRepository repository, UserAssembler assembler) {
+	@Autowired
+	private PaymentRepository paymentRepository;
+	
+	@Autowired
+	private MovieRepository movieRepository;
+	
+	public UserController(UserRepository repository, UserAssembler assembler, PaymentRepository paymentRepository, MovieRepository movieRepository) {
 		this.userRespository = repository;
 		this.userAssembler =assembler;
+		this.paymentRepository = paymentRepository;
+		this.movieRepository = movieRepository;
 	}
 	
     @GetMapping("/users/{id}")
@@ -109,6 +121,32 @@ public class UserController {
     		}
     	}
     	return payment;
+    }
+    
+    @GetMapping("/user/sortedPayments")
+    public List<PaymentDTO> getPayments() {
+    	
+    	List<PaymentDTO> response = new ArrayList<PaymentDTO>();
+    	
+    	List<User> users = userRespository.findAll();
+    	List<Movie> movies = movieRepository.findAll();
+    	
+    	for(User u : users) {
+    		for(Movie m : movies) {
+    			PaymentDTO dto = new PaymentDTO();
+    			List<Payment> ps =	paymentRepository.findFirstByUser_idAndMovie_id(u.getId(), m.getId());
+    			Payment p = ps.get(0);
+    			if(p != null) {
+    				dto.setDate(p.getCreated_date());
+    				dto.setMovieName(m.getName());
+    				dto.setPaymentCode(p.getPaymentCode());
+    				dto.setUserName(u.getName());
+    				response.add(dto);
+    			}
+    		}
+    	}
+    	
+    	return response;
     }
 	
 }

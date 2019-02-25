@@ -7,5 +7,7 @@ import com.admin.portal.models.User;
 public interface UserRepository extends JpaRepository<User, Long> { 
 	
 //	User findById(Long id);
+	
+	
 
 }
